@@ -8,40 +8,38 @@ param(
 	[string] $Drive,
 	[string] $NetworkPath
 )
-	Write-Host "-> MountNetworkDrive"
-	$objNet = New-Object -ComObject "WScript.Network"
-	$objNet.MapNetworkDrive(($Drive), $NetworkPath)
-	Start-Sleep -Milliseconds 500	
-	Write-Host (Get-PSDrive) # Do not remove, is't workaround for Join-Path
-	Write-Host "<- MountNetworkDrive"
+	(New-Object -ComObject "WScript.Network").MapNetworkDrive($Drive, $NetworkPath)
 }
-#--------------------------------------------------------------------------------
 
-#--------------------------------------------------------------------------------
 function DismountNetworkDrive {
 param(
 	[string] $Drive
 )
-	Write-Host "-> DismountNetworkDrive"
-	$objNet = New-Object -ComObject "WScript.Network"
-	Write-Host "Removing $Drive ..."
-	$objNet.RemoveNetworkDrive($Drive, $true)
-	Write-Host "<- DismountNetworkDrive"
+	(New-Object -ComObject "WScript.Network").RemoveNetworkDrive($Drive, $true)
 }
 
+function Exists-Drive { 
+    param([string] $driveletter) 
+ 
+    (New-Object System.IO.DriveInfo($driveletter)).DriveType -ne 'NoRootDirectory'   
+} 
 
+function DismountNetworkDriveIfMounted {
+	param([string] $driveletter)
+	if (Exists-Drive $driveletter)
+	{
+		DismountNetworkDrive $driveletter
+	}
+}
 
 $lines = netsh wlan show interfaces 
 $filteredLines = $lines | where { $_ -match " : " }
-##$filteredLines = $lines | where { $_ -match "State|SSID" } | where { $_ -notMatch "BSSID" }
 ##will need this: http://social.technet.microsoft.com/Forums/en-CA/winserverpowershell/thread/4ac53d11-40ed-4c40-aab3-451ad502667e
 
 $parsed = $filteredLines -split " : "
 
 $objArray = @{}
-$key = ""
-$val = ""
-$x=1
+$key = ""; $val = ""; $x=1
 foreach ($line in $parsed)
 {
 	if($x -eq 1)
