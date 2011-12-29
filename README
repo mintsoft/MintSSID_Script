@@ -1,9 +1,8 @@
 A powershell script to run scripts depending on the SSID of the wireless network the machine
 is connected to.
 
-To be included:
- a "default-pre" script that will always get executed before the SSID script
- a "default-post" script that will always get executed after the SSID script
+To Do:
+ Rewriting the data gathering to no longer use parsing from netsh
 
 ================================================================================
   Copyright 2011 Robert Emery
